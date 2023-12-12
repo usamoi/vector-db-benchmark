@@ -85,6 +85,17 @@ $$);
             cur.execute(create_index_command)
             cls.conn.commit()
         # wait index finished
+        while True:
+            done = True
+            with cls.conn.cursor() as cur:
+                test = cur.execute("SELECT indexname FROM pg_vector_index_info;")
+                for e in test:
+                    if e:
+                        done = False
+                cls.conn.commit()
+            if done:
+                break
+            time.sleep(15)
         with cls.conn.cursor() as cur:
             cur.execute("SELECT phase, tuples_done, tuples_total FROM pg_stat_progress_create_index;")
             cls.conn.commit()
